@@ -265,4 +265,92 @@ router.post('/getJCEreport', async (req, res) => {
   
 });
 
+router.post('/getJCEdataBARCODE', async (req, res) => {
+  console.log("--getJCEdataBARCODE--");
+  //-------------------------------------
+  console.log(req.body);
+  input = req.body;
+  //-------------------------------------
+  let output = {};
+  let ALLcou = 0;
+  let OKcou = 0;
+  let AENGcou = 0;
+  let WNGcoa = 0;
+  let result = 0;
+  let DATEdata = ''
+
+  output = {
+    'STATUS': 'NOK',
+    "ALL_AUTO": '0',
+    "OK": '0',
+    "WNG": '0',
+    "NG": '0',
+    "AENG": '0',
+  }
+
+
+  if (input[`BARCODE`] != undefined) {
+
+    let inputBARCODE = input[`BARCODE`];
+
+
+    var db = await mssql.qurey(`SELECT * FROM [GW_SUPPORT].[dbo].[data_with_code] WHERE  [daycode04]='${inputBARCODE}' AND [daycode03]='auto' order by datetime asc`);
+    if (db === `er`) {
+      return res.json({ "status": "nok", "note": "database error" });
+    }
+
+    try {
+
+      result = db[`recordsets`][0]
+    } catch (err) {
+      return res.json({ "status": "nok", "note": "database error" });
+    }
+
+
+
+    for (i = 0; i < result.length; i++) {
+      if (result[i][`data`].replace("OKNG", "").includes('Type')) {
+        ALLcou++;
+      }
+
+      if (result[i][`data`].replace("OKNG", "").includes('OK') && result[i][`data`].replace("OKNG", "").includes('Type')) {
+        if (result[i][`data`].replace("OKNG", "").includes('WNG') === false) {
+          if (result[i][`data`].replace("OKNG", "").includes('AENG') === false) {
+            OKcou++;
+          }
+        }
+
+      }
+      if (result[i][`data`].replace("OKNG", "").includes('AENG') && result[i][`data`].replace("OKNG", "").includes('Type')) {
+        if (result[i][`data`].replace("OKNG", "").includes('WNG') === false) {
+          AENGcou++;
+        }
+      }
+      if (result[i][`data`].replace("OKNG", "").includes('WNG') && result[i][`data`].replace("OKNG", "").includes('Type')) {
+        if (result[i][`data`].replace("OKNG", "").includes('AENG') === false) {
+          WNGcoa++;
+        }
+      }
+
+    }
+
+    if(result.length>0){
+      output = {
+        'STATUS': 'OK',
+        "ALL_AUTO": ALLcou,
+        "OK": OKcou,
+        "WNG": WNGcoa,
+        "NG": ALLcou - OKcou - WNGcoa - AENGcou,
+        "AENG": AENGcou,
+      }
+    }
+
+
+
+  }
+
+  //-------------------------------------
+  return res.json(output);
+});
+
 module.exports = router;
