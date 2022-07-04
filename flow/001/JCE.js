@@ -216,12 +216,11 @@ router.post('/getJCEreport', async (req, res) => {
   output = {
     'STATUS': 'NOK',
     "DATE": '',
-    "DATEstep": 0,
-    "ALL_AUTO": '',
-    "OK": '',
-    "WNG": '',
-    "NG": '',
-    "AENG": '',
+    "ALL_AUTO": '0',
+    "OK": '0',
+    "WNG": '0',
+    "NG": '0',
+    "AENG": '0',
   }
   //-------------------------------------
   if (input[`STARTyear`] !== undefined && input[`STARTmonth`] !== undefined && input[`STARTday`] !== undefined && input[`ENDyear`] !== undefined && input[`ENDmonth`] !== undefined && input[`ENDday`] !== undefined) {
@@ -231,8 +230,33 @@ router.post('/getJCEreport', async (req, res) => {
     //{ DATE : { $gt :  START, $lt : END}}
 
     // let finddata = await mongodb.find("JCEDATA", "DAY", { "DATEstep" : START});
+    let finddata = await mongodb.find("JCEDATA", "DAY", { "DATEstep" : { $gte :  START, $lte : END}});
 
-    output = START;
+    if(finddata.length > 0){
+      let iALL_AUTO = 0;
+      let iOK = 0;
+      let iWNG = 0;
+      let iNG = 0;
+      let iAENG = 0;
+
+      for(i=0;i<finddata.length;i++){
+        iALL_AUTO = iALL_AUTO+ finddata[i]['ALL_AUTO'];
+        iOK = iOK+ finddata[i]['OK'];
+        iWNG = iWNG+ finddata[i]['WNG'];
+        iNG = iNG+ finddata[i]['NG'];
+        iAENG = iAENG+ finddata[i]['AENG'];
+      }
+      output = {
+        'STATUS': 'OK',
+        "DATE": `(${input[`STARTyear`]}-${input[`STARTmonth`]}-${input[`STARTday`]})-(${input[`ENDyear`]}-${input[`ENDmonth`]}-${input[`ENDday`]})`,
+        "ALL_AUTO": iALL_AUTO,
+        "OK": iOK,
+        "WNG": iWNG,
+        "NG": iNG,
+        "AENG": iAENG,
+      }
+    }
+    
   }
 
   //-------------------------------------
