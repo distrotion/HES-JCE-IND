@@ -337,6 +337,7 @@ router.post('/getJCEdataBARCODE', async (req, res) => {
     if(result.length>0){
       output = {
         'STATUS': 'OK',
+        "PO":inputBARCODE,
         "ALL_AUTO": ALLcou,
         "OK": OKcou,
         "WNG": WNGcoa,
