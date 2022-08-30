@@ -225,26 +225,26 @@ router.post('/getJCEreport', async (req, res) => {
   //-------------------------------------
   if (input[`STARTyear`] !== undefined && input[`STARTmonth`] !== undefined && input[`STARTday`] !== undefined && input[`ENDyear`] !== undefined && input[`ENDmonth`] !== undefined && input[`ENDday`] !== undefined) {
     let START = Math.floor(new Date(`${input[`STARTyear`]}.${input[`STARTmonth`]}.${input[`STARTday`]}`).getTime() / 1000);
-    let END =  Math.floor(new Date(`${input[`ENDyear`]}.${input[`ENDmonth`]}.${input[`ENDday`]}`).getTime() / 1000);
+    let END = Math.floor(new Date(`${input[`ENDyear`]}.${input[`ENDmonth`]}.${input[`ENDday`]}`).getTime() / 1000);
 
     //{ DATE : { $gt :  START, $lt : END}}
 
     // let finddata = await mongodb.find("JCEDATA", "DAY", { "DATEstep" : START});
-    let finddata = await mongodb.find("JCEDATA", "DAY", { "DATEstep" : { $gte :  START, $lte : END}});
+    let finddata = await mongodb.find("JCEDATA", "DAY", { "DATEstep": { $gte: START, $lte: END } });
 
-    if(finddata.length > 0){
+    if (finddata.length > 0) {
       let iALL_AUTO = 0;
       let iOK = 0;
       let iWNG = 0;
       let iNG = 0;
       let iAENG = 0;
 
-      for(i=0;i<finddata.length;i++){
-        iALL_AUTO = iALL_AUTO+ finddata[i]['ALL_AUTO'];
-        iOK = iOK+ finddata[i]['OK'];
-        iWNG = iWNG+ finddata[i]['WNG'];
-        iNG = iNG+ finddata[i]['NG'];
-        iAENG = iAENG+ finddata[i]['AENG'];
+      for (i = 0; i < finddata.length; i++) {
+        iALL_AUTO = iALL_AUTO + finddata[i]['ALL_AUTO'];
+        iOK = iOK + finddata[i]['OK'];
+        iWNG = iWNG + finddata[i]['WNG'];
+        iNG = iNG + finddata[i]['NG'];
+        iAENG = iAENG + finddata[i]['AENG'];
       }
       output = {
         'STATUS': 'OK',
@@ -256,13 +256,13 @@ router.post('/getJCEreport', async (req, res) => {
         "AENG": iAENG,
       }
     }
-    
+
   }
 
   //-------------------------------------
   return res.json(output);
 
-  
+
 });
 
 router.post('/getJCEdataBARCODE', async (req, res) => {
@@ -288,65 +288,69 @@ router.post('/getJCEdataBARCODE', async (req, res) => {
     "AENG": '0',
   }
 
+  try {
 
-  if (input[`BARCODE`] != undefined) {
+    if (input[`BARCODE`] != undefined) {
 
-    let inputBARCODE = input[`BARCODE`];
-
-
-    var db = await mssql.qurey(`SELECT * FROM [GW_SUPPORT].[dbo].[data_with_code] WHERE  [daycode04]='${inputBARCODE}' AND [daycode03]='auto' order by datetime asc`);
-    if (db === `er`) {
-      return res.json({ "status": "nok", "note": "database error" });
-    }
-
-    try {
-
-      result = db[`recordsets`][0]
-    } catch (err) {
-      return res.json({ "status": "nok", "note": "database error" });
-    }
+      let inputBARCODE = input[`BARCODE`];
 
 
-
-    for (i = 0; i < result.length; i++) {
-      if (result[i][`data`].replace("OKNG", "").includes('Type')) {
-        ALLcou++;
+      var db = await mssql.qurey(`SELECT * FROM [GW_SUPPORT].[dbo].[data_with_code] WHERE  [daycode04]='${inputBARCODE}' AND [daycode03]='auto' order by datetime asc`);
+      if (db === `er`) {
+        return res.json({ "status": "nok", "note": "database error" });
       }
 
-      if (result[i][`data`].replace("OKNG", "").includes('OK') && result[i][`data`].replace("OKNG", "").includes('Type')) {
-        if (result[i][`data`].replace("OKNG", "").includes('WNG') === false) {
+      try {
+
+        result = db[`recordsets`][0]
+      } catch (err) {
+        return res.json({ "status": "nok", "note": "database error" });
+      }
+
+
+
+      for (i = 0; i < result.length; i++) {
+        if (result[i][`data`].replace("OKNG", "").includes('Type')) {
+          ALLcou++;
+        }
+
+        if (result[i][`data`].replace("OKNG", "").includes('OK') && result[i][`data`].replace("OKNG", "").includes('Type')) {
+          if (result[i][`data`].replace("OKNG", "").includes('WNG') === false) {
+            if (result[i][`data`].replace("OKNG", "").includes('AENG') === false) {
+              OKcou++;
+            }
+          }
+
+        }
+        if (result[i][`data`].replace("OKNG", "").includes('AENG') && result[i][`data`].replace("OKNG", "").includes('Type')) {
+          if (result[i][`data`].replace("OKNG", "").includes('WNG') === false) {
+            AENGcou++;
+          }
+        }
+        if (result[i][`data`].replace("OKNG", "").includes('WNG') && result[i][`data`].replace("OKNG", "").includes('Type')) {
           if (result[i][`data`].replace("OKNG", "").includes('AENG') === false) {
-            OKcou++;
+            WNGcoa++;
           }
         }
 
       }
-      if (result[i][`data`].replace("OKNG", "").includes('AENG') && result[i][`data`].replace("OKNG", "").includes('Type')) {
-        if (result[i][`data`].replace("OKNG", "").includes('WNG') === false) {
-          AENGcou++;
+
+      if (result.length > 0) {
+        output = {
+          'STATUS': 'OK',
+          "PO": inputBARCODE,
+          "ALL_AUTO": ALLcou,
+          "OK": OKcou,
+          "WNG": WNGcoa,
+          "NG": ALLcou - OKcou - WNGcoa - AENGcou,
+          "AENG": AENGcou,
         }
       }
-      if (result[i][`data`].replace("OKNG", "").includes('WNG') && result[i][`data`].replace("OKNG", "").includes('Type')) {
-        if (result[i][`data`].replace("OKNG", "").includes('AENG') === false) {
-          WNGcoa++;
-        }
-      }
+
+
 
     }
-
-    if(result.length>0){
-      output = {
-        'STATUS': 'OK',
-        "PO":inputBARCODE,
-        "ALL_AUTO": ALLcou,
-        "OK": OKcou,
-        "WNG": WNGcoa,
-        "NG": ALLcou - OKcou - WNGcoa - AENGcou,
-        "AENG": AENGcou,
-      }
-    }
-
-
+  } catch (err) {
 
   }
 

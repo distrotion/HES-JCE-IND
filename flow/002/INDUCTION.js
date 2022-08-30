@@ -172,6 +172,77 @@ router.post('/COILcheckdate', async (req, res) => {
 });
 
 
+router.post('/getallACTUAL', async (req, res) => {
+  //-------------------------------------
+  console.log(req.body);
+  let input = req.body;
+
+  //-------------------------------------
+  let output = [];
+  try {
+    let getACTIVE = await mongodb.find(INDUCTION, COIL_EX, { $and: [{ "STATUS": 'ACTIVE', }] });
+
+    // console.log(getACTIVE);
+
+
+    for (i = 0; i < getACTIVE.length; i++) {
+      query = `SELECT  *  FROM [PLANT_SUPPORT].[dbo].[HES_INDUCTION] where [F72]='${getACTIVE[i][`WID`]}'`
+      var db = await mssql.qurey(query);
+      let dataDB = db[`recordsets`][0]
+      output.push({
+        WID: getACTIVE[i][`WID`],
+        COIL_NAME: getACTIVE[i][`COIL_NAME`],
+        PATTERN: getACTIVE[i][`PATTERN`],
+        LIMIT: getACTIVE[i][`LIMIT`],
+        COIL_NO: getACTIVE[i][`COIL_NO`],
+        STATUS: getACTIVE[i][`STATUS`],
+        COUNTER: dataDB.length
+      })
+    }
+
+  }
+  catch (err) {
+    output = [];
+  }
+
+  res.json(output);
+});
+
+
+router.post('/getSingleACTUAL', async (req, res) => {
+  //-------------------------------------
+  console.log(req.body);
+  let input = req.body;
+
+  //-------------------------------------
+  let output = [];
+  try {
+    if (input[`WID`] != undefined) {
+      let getACTIVE = await mongodb.find(INDUCTION, COIL_EX, { $and: [{ "WID": input[`WID`], }] });
+
+      query = `SELECT  *  FROM [PLANT_SUPPORT].[dbo].[HES_INDUCTION] where [F72]='${getACTIVE[0][`WID`]}'`
+      var db = await mssql.qurey(query);
+      let dataDB = db[`recordsets`][0]
+      output.push({
+        WID: getACTIVE[0][`WID`],
+        COIL_NAME: getACTIVE[0][`COIL_NAME`],
+        PATTERN: getACTIVE[0][`PATTERN`],
+        LIMIT: getACTIVE[0][`LIMIT`],
+        COIL_NO: getACTIVE[0][`COIL_NO`],
+        STATUS: getACTIVE[0][`STATUS`],
+        COUNTER: dataDB.length
+      })
+    }
+
+  }
+  catch (err) {
+    output = [];
+  }
+
+  res.json(output);
+});
+
+
 
 
 
