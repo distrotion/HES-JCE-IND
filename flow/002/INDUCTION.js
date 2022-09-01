@@ -62,7 +62,7 @@ router.post('/INDcoilUPDATE', async (req, res) => {
       // if (check2.length > 0) {
 
       // } else {
-        let upd = await mongodb.update(INDUCTION, COIL_EX, { "WID": input['WID'] }, { $set: { "COIL_NAME": input['COIL_NAME'], "PATTERN": input['PATTERN'], "LIMIT": input['LIMIT'], "COIL_NO": input['COIL_NO'] } });
+        let upd = await mongodb.update(INDUCTION, COIL_EX, { "WID": input['WID'] }, { $set: { "COIL_NAME": input['COIL_NAME'], "PATTERN": input['PATTERN'], "LIMIT": input['LIMIT'], "COIL_NO": input['COIL_NO'], "COIL_NO": input['COIL_NO'], "MODEL": input['MODEL'] } });
       // }
 
       if (input['STATUS'] === 'ACTIVE') {
@@ -202,6 +202,7 @@ router.post('/getallACTUAL', async (req, res) => {
         LIMIT: getACTIVE[i][`LIMIT`],
         COIL_NO: getACTIVE[i][`COIL_NO`],
         STATUS: getACTIVE[i][`STATUS`],
+        MODEL: getACTIVE[i][`MODEL`],
         COUNTER: dataDB.length,
         TOTAL: dataDB2.length
       })
