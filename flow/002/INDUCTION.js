@@ -44,26 +44,26 @@ router.post('/INDcoilUPDATE', async (req, res) => {
     let check = await mongodb.find(INDUCTION, COIL_EX, { "WID": input['WID'] });
 
     if (check.length === 0) {
-      let check2 = await mongodb.find(INDUCTION, COIL_EX, { $and: [{ "COIL_NAME": input['COIL_NAME'] }] });
+      // let check2 = await mongodb.find(INDUCTION, COIL_EX, { $and: [{ "COIL_NAME": input['COIL_NAME'] }] });
 
-      if (check2.length > 0) {
+      // if (check2.length > 0) {
 
-      } else {
+      // } else {
         input['WID'] = `WIDA-${Date.now()}`;
         input['COUNTER'] = '0';
         input['STATUS'] = '';
         var ins = await mongodb.insertMany(INDUCTION, COIL_EX, [input]);
-      }
+      // }
 
     } else {
       //
-      let check2 = await mongodb.find(INDUCTION, COIL_EX, { $and: [{ "COIL_NAME": input['COIL_NAME'] }] });
+      // let check2 = await mongodb.find(INDUCTION, COIL_EX, { $and: [{ "COIL_NAME": input['COIL_NAME'] }] });
 
-      if (check2.length > 0) {
+      // if (check2.length > 0) {
 
-      } else {
+      // } else {
         let upd = await mongodb.update(INDUCTION, COIL_EX, { "WID": input['WID'] }, { $set: { "COIL_NAME": input['COIL_NAME'], "PATTERN": input['PATTERN'], "LIMIT": input['LIMIT'], "COIL_NO": input['COIL_NO'] } });
-      }
+      // }
 
       if (input['STATUS'] === 'ACTIVE') {
         let check3 = await mongodb.find(INDUCTION, COIL_EX, { $and: [{ "STATUS": 'ACTIVE', "COIL_NO": input['COIL_NO'], "PATTERN": input['PATTERN'] }] });
