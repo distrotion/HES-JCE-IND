@@ -186,9 +186,15 @@ router.post('/getallACTUAL', async (req, res) => {
 
 
     for (i = 0; i < getACTIVE.length; i++) {
-      query = `SELECT  *  FROM [PLANT_SUPPORT].[dbo].[HES_INDUCTION] where [F72]='${getACTIVE[i][`WID`]}'`
+      //
+      query = `SELECT  *  FROM [PLANT_SUPPORT].[dbo].[HES_INDUCTION] where [F72]='${getACTIVE[i][`WID`]}' and [F73]='${getACTIVE[i][`COIL_NAME`]}'`
       var db = await mssql.qurey(query);
       let dataDB = db[`recordsets`][0]
+      //
+      query2 = `SELECT  *  FROM [PLANT_SUPPORT].[dbo].[HES_INDUCTION] where  [F73]='${getACTIVE[i][`COIL_NAME`]}'`
+      var db2 = await mssql.qurey(query2);
+      let dataDB2 = db2[`recordsets`][0]
+      //
       output.push({
         WID: getACTIVE[i][`WID`],
         COIL_NAME: getACTIVE[i][`COIL_NAME`],
@@ -196,7 +202,8 @@ router.post('/getallACTUAL', async (req, res) => {
         LIMIT: getACTIVE[i][`LIMIT`],
         COIL_NO: getACTIVE[i][`COIL_NO`],
         STATUS: getACTIVE[i][`STATUS`],
-        COUNTER: dataDB.length
+        COUNTER: dataDB.length,
+        TOTAL: dataDB2.length
       })
     }
 
